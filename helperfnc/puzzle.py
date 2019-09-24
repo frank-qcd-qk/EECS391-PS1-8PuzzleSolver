@@ -1,5 +1,7 @@
 import random
-class puzzle:
+from helperfnc.frank_generic import frank_function as ff
+
+class eight_puzzle:
     """
     8 puzzle class
     """
@@ -7,36 +9,6 @@ class puzzle:
     def __init__(self, board, maxNodeCount):
         self.board = board
         self.maxNode = 0
-        self.MINIMAL = False
-        self.DEBUG = True
-
-    def customPrint(self, input_str, level=0):
-        """
-        Parameters
-        ----------
-        input_str : str
-            The text string you want to print it out. It must be a string.
-
-        level : int
-            The information level of the string.
-        """
-        message = str(input_str)
-        if level == 0:
-            if self.DEBUG:
-                print("[DEBUG]"+message)
-        elif level == 1:
-            if not self.MINIMAL:
-                print("[INFO]"+message)
-        elif level == 2:
-            print("[WARNING]"+message)
-        elif level == 3:
-            print("[ERROR]"+message)
-        elif level == 4:
-            print("[CRITICAL]"+message)
-        elif level == 5:
-            print("[FATAL]"+message)
-        else:
-            print(message)
 
     def customSwap(self, i, j, input_str=""):
         """
@@ -47,30 +19,30 @@ class puzzle:
             input_str = self.board
         input_str_list = list(input_str)
         input_str_list[i], input_str_list[j] = input_str_list[j], input_str_list[i]
-        self.customPrint(
+        ff.customPrint(
             "Swapped: |"+input_str_list[i]+"| and |"+input_str_list[j]+"|", 2)
         return ''.join(input_str_list)
 
     def printState(self):
         try:
-            self.customPrint("Current Board State:", 1)
-            self.customPrint("+-----------+", 6)
-            self.customPrint(
+            ff.customPrint("Current Board State:", 1)
+            ff.customPrint("+-----------+", 6)
+            ff.customPrint(
                 "| "+self.board[0]+" | "+self.board[1]+" | "+self.board[2]+" | ", 6)
-            self.customPrint(
+            ff.customPrint(
                 "| "+self.board[3]+" | "+self.board[4]+" | "+self.board[5]+" | ", 6)
-            self.customPrint(
+            ff.customPrint(
                 "| "+self.board[6]+" | "+self.board[7]+" | "+self.board[8]+" | ", 6)
-            self.customPrint("+-----------+", 6)
+            ff.customPrint("+-----------+", 6)
         except:
-            self.customPrint("Board State ERROR!", 5)
+            ff.customPrint("Board State ERROR!", 5)
             exit(99)
         finally:
-            self.customPrint("Board State Print completed")
+            ff.customPrint("Board State Print completed")
 
     def setState(self, state):
         self.board = state
-        self.customPrint("State Set successfully!")
+        ff.customPrint("State Set successfully!")
         self.printState()
 
     def maxNode(self, count):
@@ -117,7 +89,7 @@ class puzzle:
 
     def move(self, command, ID, action):
         status = -1
-        self.customPrint("Moving: "+command)
+        ff.customPrint("Moving: "+command)
         if(command == 'up'):
             status = self.moveUp(ID, action)
         if(command == 'down'):
@@ -128,15 +100,15 @@ class puzzle:
             status = self.moveRight(ID, action)
         if (status == 1):
             if action:
-                self.customPrint("Move Success", 1)
+                ff.customPrint("Move Success", 1)
             else:
-                self.customPrint("Plan success",1)
+                ff.customPrint("Plan success",1)
             return 1
         elif (status == 3):
-            self.customPrint("Not a valid move due to already at boarder", 2)
+            ff.customPrint("Not a valid move due to already at boarder", 2)
             return 3
         else:
-            self.customPrint("Move failed for some unknown reason. Status: "+str(status),0)
+            ff.customPrint("Move failed for some unknown reason. Status: "+str(status),0)
             return 99
 
     def isGoal(self):
@@ -157,16 +129,4 @@ class puzzle:
                     action_step = action_step+action+", "
                 else:
                     action = random.choice(["up", "down", "left", "right"])
-        self.customPrint("Randomize complete. Steps are:"+action_step,1)
-
-
-
-
-puzzle = puzzle("b12345678",10000)        
-for i in range(10000):
-    puzzle.randomize(100)
-    puzzle.printState()
-    puzzle.setState("b12345678")
-
-                
-
+        ff.customPrint("Randomize complete. Steps are:"+action_step,1)
