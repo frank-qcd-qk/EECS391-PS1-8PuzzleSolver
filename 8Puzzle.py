@@ -89,16 +89,16 @@ class puzzle:
             return 3
 
     def moveDown(self, ID, action):
-        if(ID <= 6):
+        if (ID <6 ):
             if action:
                 outcome = self.customSwap(ID, ID+3)
                 self.setState(outcome)
-                return 1
+            return 1
         else:
             return 3
 
     def moveLeft(self, ID, action):
-        if(ID % 3 == 0):
+        if not (ID % 3 == 0):
             if action:
                 outcome = self.customSwap(ID, ID-1)
                 self.setState(outcome)
@@ -107,7 +107,7 @@ class puzzle:
             return 3
 
     def moveRight(self, ID, action):
-        if(ID % 3 == 2):
+        if not (ID % 3 == 2):
             if action:
                 outcome = self.customSwap(ID, ID+1)
                 self.setState(outcome)
@@ -117,22 +117,26 @@ class puzzle:
 
     def move(self, command, ID, action):
         status = -1
+        self.customPrint("Moving: "+command)
         if(command == 'up'):
-            status = self.moveUp(command, ID, action)
+            status = self.moveUp(ID, action)
         if(command == 'down'):
-            status = self.moveDown(command, ID, action)
+            status = self.moveDown(ID, action)
         if(command == 'left'):
-            status = self.moveLeft(command, ID, action)
+            status = self.moveLeft(ID, action)
         if(command == 'right'):
-            status = self.moveRight(command, ID, action)
+            status = self.moveRight(ID, action)
         if (status == 1):
-            self.customPrint("Move Success", 1)
+            if action:
+                self.customPrint("Move Success", 1)
+            else:
+                self.customPrint("Plan success",1)
             return 1
         elif (status == 3):
             self.customPrint("Not a valid move due to already at boarder", 2)
             return 3
         else:
-            self.customPrint("Move failed for some unknown reason")
+            self.customPrint("Move failed for some unknown reason. Status: "+str(status),0)
             return 99
 
     def isGoal(self):
@@ -155,11 +159,14 @@ class puzzle:
                     action = random.choice(["up", "down", "left", "right"])
         self.customPrint("Randomize complete. Steps are:"+action_step,1)
 
-        
 
-puzzle = puzzle("b12345678",10000)
-puzzle.randomize(25)
-puzzle.printState()
+
+
+puzzle = puzzle("b12345678",10000)        
+for i in range(10000):
+    puzzle.randomize(100)
+    puzzle.printState()
+    puzzle.setState("b12345678")
 
                 
 
