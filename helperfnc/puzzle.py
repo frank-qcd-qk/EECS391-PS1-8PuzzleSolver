@@ -1,12 +1,13 @@
 import random
 from helperfnc.frank_generic import frank_function as ff
 
+
 class eight_puzzle:
     """
     8 puzzle class
     """
 
-    def __init__(self, board, maxNodeCount):
+    def __init__(self, board="b12345678"):
         self.board = board
         self.maxNode = 0
 
@@ -40,8 +41,10 @@ class eight_puzzle:
         finally:
             ff.customPrint("Board State Print completed")
 
+    #! Function used for easy method of setting the state of the board
     def setState(self, state):
-        self.board = state
+        new_state = state.replace(" ", "")
+        self.board = new_state
         ff.customPrint("State Set successfully!")
         self.printState()
 
@@ -61,7 +64,7 @@ class eight_puzzle:
             return 3
 
     def moveDown(self, ID, action):
-        if (ID <6 ):
+        if (ID < 6):
             if action:
                 outcome = self.customSwap(ID, ID+3)
                 self.setState(outcome)
@@ -102,13 +105,14 @@ class eight_puzzle:
             if action:
                 ff.customPrint("Move Success", 1)
             else:
-                ff.customPrint("Plan success",1)
+                ff.customPrint("Plan success", 1)
             return 1
         elif (status == 3):
             ff.customPrint("Not a valid move due to already at boarder", 2)
             return 3
         else:
-            ff.customPrint("Move failed for some unknown reason. Status: "+str(status),0)
+            ff.customPrint(
+                "Move failed for some unknown reason. Status: "+str(status), 0)
             return 99
 
     def isGoal(self):
@@ -117,16 +121,59 @@ class eight_puzzle:
         else:
             return False
 
-    def randomize(self,count):
+    def randomize(self, count):
         action_step = ""
         for i in range(count):
             success = False
             action = random.choice(["up", "down", "left", "right"])
             while not success:
-                if self.move(action,self.findBlank(),False) == 1:
-                    self.move(action,self.findBlank(),True)
+                if self.move(action, self.findBlank(), False) == 1:
+                    self.move(action, self.findBlank(), True)
                     success = True
                     action_step = action_step+action+", "
                 else:
                     action = random.choice(["up", "down", "left", "right"])
-        ff.customPrint("Randomize complete. Steps are:"+action_step,1)
+        ff.customPrint("Randomize complete. Steps are:"+action_step, 1)
+
+    def calculateHeuristic1(self):
+        """
+        h1 = the number of misplaced tiles.
+        """
+        heuristic1 = 0
+        u = zip(self.board, "b12345678")
+        for i, j in u:
+            if (not i == j) and (not i == 'b'):
+                heuristic1 = heuristic1 + 1
+        ff.customPrint("Current Heuristic is "+str(heuristic1))
+        return heuristic1
+
+    def calculateHeuristic2(self):
+        """
+        h2 = the sum of the distances of the tiles from their goal positions.
+        """
+        heuristic2 = 0
+        row_tracker = 1
+        column_tracker = 0
+        for i in self.board:
+            if column_tracker != 3:
+                column_tracker = column_tracker + 1
+            else:
+                column_tracker = 1
+                if row_tracker != 3:
+                    row_tracker = row_tracker + 1
+                else:
+                    row_tracker = 1
+
+            #ff.customPrint("Current item "+str(i) + " Current row " +str(row_tracker)+" Current column "+str(column_tracker))
+
+            if i != 'b':
+                target_row = int(int(i)/3) + 1
+                target_column = int(i) % 3 + 1
+                #sff.customPrint("Current item "+str(i) + " Current row " +str(target_row)+" Current column "+str(target_column))
+                heuristic2 = heuristic2 + \
+                    abs(target_row-row_tracker) + \
+                    abs(target_column-column_tracker)
+
+            #ff.customPrint("Current Heuristic "+str(abs(target_row-row_tracker)+abs(target_column-column_tracker)))
+        ff.customPrint("Current Heuristic is "+str(heuristic2))
+        return heuristic2
