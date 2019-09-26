@@ -56,64 +56,64 @@ class eight_puzzle:
 
     def moveUp(self, ID, action):
         if (ID >= 3):
+            outcome = self.customSwap(ID, ID-3)
             if action:
-                outcome = self.customSwap(ID, ID-3)
                 self.setState(outcome)
-            return 1
+            return 1, outcome
         else:
-            return 3
+            return 3, ""
 
     def moveDown(self, ID, action):
         if (ID < 6):
+            outcome = self.customSwap(ID, ID+3)
             if action:
-                outcome = self.customSwap(ID, ID+3)
                 self.setState(outcome)
-            return 1
+            return 1, outcome
         else:
-            return 3
+            return 3, ""
 
     def moveLeft(self, ID, action):
         if not (ID % 3 == 0):
+            outcome = self.customSwap(ID, ID-1)
             if action:
-                outcome = self.customSwap(ID, ID-1)
                 self.setState(outcome)
-            return 1
+            return 1, outcome
         else:
-            return 3
+            return 3, ""
 
     def moveRight(self, ID, action):
         if not (ID % 3 == 2):
+            outcome = self.customSwap(ID, ID+1)
             if action:
-                outcome = self.customSwap(ID, ID+1)
                 self.setState(outcome)
-            return 1
+            return 1, outcome
         else:
-            return 3
+            return 3, ""
 
     def move(self, command, ID, action):
         status = -1
         ff.customPrint("Moving: "+command)
         if(command == 'up'):
-            status = self.moveUp(ID, action)
+            status, boardUpdated = self.moveUp(ID, action)
         if(command == 'down'):
-            status = self.moveDown(ID, action)
+            status, boardUpdated = self.moveDown(ID, action)
         if(command == 'left'):
-            status = self.moveLeft(ID, action)
+            status, boardUpdated = self.moveLeft(ID, action)
         if(command == 'right'):
-            status = self.moveRight(ID, action)
+            status, boardUpdated = self.moveRight(ID, action)
         if (status == 1):
             if action:
                 ff.customPrint("Move Success", 1)
             else:
                 ff.customPrint("Plan success", 1)
-            return 1
+            return 1,boardUpdated
         elif (status == 3):
             ff.customPrint("Not a valid move due to already at boarder", 2)
-            return 3
+            return 3,""
         else:
             ff.customPrint(
                 "Move failed for some unknown reason. Status: "+str(status), 0)
-            return 99
+            return 99,""
 
     def isGoal(self):
         if self.board == "b12345678":
@@ -135,7 +135,7 @@ class eight_puzzle:
                     action = random.choice(["up", "down", "left", "right"])
         ff.customPrint("Randomize complete. Steps are:"+action_step, 1)
 
-    def calculateHeuristic1(self):
+    def calculateHeuristic1(self,board=""):
         """
         h1 = the number of misplaced tiles.
         """
@@ -147,7 +147,7 @@ class eight_puzzle:
         ff.customPrint("Current Heuristic is "+str(heuristic1))
         return heuristic1
 
-    def calculateHeuristic2(self):
+    def calculateHeuristic2(self,board=""):
         """
         h2 = the sum of the distances of the tiles from their goal positions.
         """
@@ -177,3 +177,12 @@ class eight_puzzle:
             #ff.customPrint("Current Heuristic "+str(abs(target_row-row_tracker)+abs(target_column-column_tracker)))
         ff.customPrint("Current Heuristic is "+str(heuristic2))
         return heuristic2
+
+    def listAvailable(self):
+        potential = ["", "", "", ""]
+        status1,potential[0] =self.move('up',self.findBlank(), False)
+        status2,potential[1] =self.move('down',self.findBlank(), False)
+        status3,potential[2] =self.move('left',self.findBlank(), False)
+        status4,potential[3] =self.move('right',self.findBlank(), False)
+        ff.customPrint("Available Option are: "+str(potential))
+        return potential
