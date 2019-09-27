@@ -174,12 +174,11 @@ def solutionLengthCompare():
             current.randomize(20)
             resulth1,steps1 = astar(current,"h1",10000)
             resulth2,steps2 = astar(current,"h2",10000)
-            result3,steps3 = beam(current,80,1000)
-            result4,steps4 = beam(current,20,1000)
+            result3,steps3 = beam(current,80,10000)
+            result4,steps4 = beam(current,20,10000)
             LengthCompare_writer.writerow(['A-Star h1',resulth1, steps1])
             LengthCompare_writer.writerow(['A-Star h2',resulth2, steps2])
             LengthCompare_writer.writerow(['Beam 20',result4, steps4])
-            LengthCompare_writer.writerow(['Beam 80',result3, steps3])
 
 def randomizeStressTest():
     current = eight_puzzle()
