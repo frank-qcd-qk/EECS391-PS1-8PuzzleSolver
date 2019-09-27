@@ -24,7 +24,7 @@ def checkInit(initialized):
 def astar(boardClass, heruisticsOption, maxNodes):
     moves = 0
     openList = [boardClass]
-    closed = []
+    closeList = []
 
     while(len(openList)>0):
         puzzleNow = openList.pop(0)
@@ -36,7 +36,7 @@ def astar(boardClass, heruisticsOption, maxNodes):
         #! Completion Check
         if puzzleNow.getState() == "b12345678":
             ff.customPrint("====================Solution====================",6)
-            if len(closed) > 0:
+            if len(closeList) > 0:
                 solution = puzzleNow.reverseTraversal([])
                 solution.reverse()
                 solutionStep = []
@@ -60,10 +60,10 @@ def astar(boardClass, heruisticsOption, maxNodes):
                 ff.customPrint("Given a Solved board!",4)
                 return 
         #! Search by getting babies!
-        new_moves = puzzleNow.listAvailable()
-        for move in new_moves:
-            if move != '':
-                state = eight_puzzle(move)
+        Options = puzzleNow.listAvailable()
+        for option in Options:
+            if option != '':
+                state = eight_puzzle(option)
                 if heruisticsOption == "h1":
                     state.herusticValue = state.calculateHeuristic1()
                 else:
@@ -73,7 +73,7 @@ def astar(boardClass, heruisticsOption, maxNodes):
                 state.parent = puzzleNow
                 #? Check existance
                 openID = ff.find_index(openList, state)
-                closeID = ff.find_index(closed, state)
+                closeID = ff.find_index(closeList, state)
                 if openID == -1 and closeID == -1:
                     #* Not searched
                     openList.append(state)    
@@ -85,20 +85,77 @@ def astar(boardClass, heruisticsOption, maxNodes):
                         already_seen.parent = state.parent
                         already_seen.depth = state.depth
                 elif closeID > -1:
-                    already_seen = closed[closeID]
+                    already_seen = closeList[closeID]
                     if state.functionValue < already_seen.functionValue:
                         state.herusticValue = already_seen.herusticValue
                         state.functionValue = already_seen.functionValue
                         state.depth = already_seen.depth
                         state.parent = already_seen.parent
-                        closed.remove(already_seen)
+                        closeList.remove(already_seen)
                         openList.append(state)
-        closed.append(puzzleNow)
-        open_list = sorted(openList, key=lambda p: p.functionValue)
+        closeList.append(puzzleNow)
+        openList = sorted(openList, key=lambda p: p.functionValue)
 
 
+def beam(boardClass,k):
+    moves = 0
+    childrenSorted = []
+    allChildren = []
+    empty = False
+    best = [boardClass]
+    while not empty:
+        for child in best:
+            #! Node Cap
+            if(moves>maxNodes):
+                ff.customPrint("Exceed allowed maxNodes!",4)
+                return            
+            #! Goal!
+            if child.getState() == "b12345678":
+                ff.customPrint("====================Solution====================",6)
+                solution = child.reverseTraversal([])
+                solution.reverse()
+                move_path = []
+                for index, item in enumerate(solution):
+                    if not index % 2 == 0:
+                        move_path.append(item)
 
-        
+                for index, item in enumerate(solution):
+                    if index == 0:
+                        ff.customPrint("Starting state",6)
+                        item.printState()
+                    elif index % 2 == 0:
+                        item.printState()
+                    else:
+                        ff.customPrint("move " + str(item),6)
+                ff.customPrint("Solution length:"+str(child.depth + 1),2)
+                ff.customPrint("Solution path:"+str(move_path),2)
+                return solution, child.depth
+            else:
+                currentPuzzle = child
+                options = currentPuzzle.listAvailable()
+                for option in options:
+                    if option!='':
+                        moves += 1
+                        state = eight_puzzle(option)
+                        state.herusticValue = state.calculateHeuristic2()
+                        state.parent = currentPuzzle
+                        state.depth = currentPuzzle.depth + 1
+                        if ff.find_index(allChildren, state) == -1:
+                            allChildren.append(state)
+                            childrenSorted.append(state)
+
+        #! Select the best
+        childrenSorted = sorted(childrenSorted, key=lambda p: p.herusticValue)
+        best = []
+        if len(childrenSorted) >= k:
+            for i in range(0, k):
+                best.append(childrenSorted.pop(0))
+        elif len(childrenSorted) < k:
+            for i in range(0, len(childrenSorted)):
+                best.append(childrenSorted.pop(0))
+        childrenSorted = []
+        empty = False
+
 
 def demo(before,actionSquence):
     ff.customPrint("====================Result Demo====================",6)
@@ -179,7 +236,7 @@ for command in commandList:
                 astar(current, "h2",maxNodes)
         if operation[1]=="beam":
             ff.customPrint("solve beam command called",2)
-            beam(current,operation[2])
+            beam(current,int(operation[2]))
 
     elif operation[0] == "maxNodes":
         try:

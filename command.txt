@@ -1,4 +1,4 @@
 setState b12 345 678
 randomizeState 30
 printState
-solve A-star h2
+solve beam 80
