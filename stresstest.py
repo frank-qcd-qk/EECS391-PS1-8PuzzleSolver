@@ -2,6 +2,7 @@ from helperfnc.puzzle import eight_puzzle
 from helperfnc.frank_generic import frank_function as ff
 import sys
 from decimal import Decimal
+import csv
 
 
 def ingest(fileLocation):
@@ -35,7 +36,7 @@ def astar(boardClass, heruisticsOption, maxNodes):
         #! Node Cap
         if(moves > maxNodes):
             ff.customPrint("Exceed allowed maxNodes!", 4)
-            return
+            return ("Unsolved",0)
         #! Completion Check
         if puzzleNow.getState() == "b12345678":
             ff.customPrint(
@@ -59,10 +60,10 @@ def astar(boardClass, heruisticsOption, maxNodes):
                         print("move " + str(item))
                 ff.customPrint("Solution path:"+str(solutionStep), 2)
                 ff.customPrint("Solution length:"+str(puzzleNow.depth), 2)
-                return solution, puzzleNow.depth
+                return "Solved",puzzleNow.depth
             else:
                 ff.customPrint("Given a Solved board!", 4)
-                return
+                return "Solved",0
         #! Search by getting babies!
         Options = puzzleNow.listAvailable()
         for option in Options:
@@ -101,7 +102,7 @@ def astar(boardClass, heruisticsOption, maxNodes):
         openList = sorted(openList, key=lambda p: p.functionValue)
 
 
-def beam(boardClass, k, maxNodes):
+def beam(boardClass, k,maxNodes):
     moves = 0
     childrenSorted = []
     allChildren = []
@@ -112,7 +113,7 @@ def beam(boardClass, k, maxNodes):
             #! Node Cap
             if(moves > maxNodes):
                 ff.customPrint("Exceed allowed maxNodes!", 4)
-                return
+                return ("Unsolved",0)
             #! Goal!
             if child.getState() == "b12345678":
                 ff.customPrint(
@@ -134,7 +135,7 @@ def beam(boardClass, k, maxNodes):
                         ff.customPrint("move " + str(item), 6)
                 ff.customPrint("Solution length:"+str(child.depth + 1), 2)
                 ff.customPrint("Solution path:"+str(move_path), 2)
-                return 
+                return "Solved",(child.depth + 1)
             else:
                 currentPuzzle = child
                 options = currentPuzzle.listAvailable()
@@ -162,76 +163,21 @@ def beam(boardClass, k, maxNodes):
         empty = False
 
 # ========================================================================================
-#! Start of the program:
-try:
-    commandfile = sys.argv[1]
-except:
-    commandfile = ".\command.txt"
+def maxNodesTest():
+    with open('maxNodeTest.csv', mode='w') as maxNodeTest_file:
+        current = eight_puzzle()
+        for i in range(0, 100):
+            for j in range(0,10):
+                current.randomize(20)
+                resulth1,steps1 = astar(current,"h1",i*100)
+                resulth2,steps2 = astar(current,"h2",i*100)
+                resultB,steps3 = beam(current,80,i*100)
+                maxNodeTest_writer = csv.writer(maxNodeTest_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                maxNodeTest_writer.writerow(['A-Star h1',(i*100), resulth1, steps1])
+                maxNodeTest_writer.writerow(['A-Star h2',(i*100), resulth2, steps2])                
+                maxNodeTest_writer.writerow(['Beam 80',(i*100), resultB, steps3])        
 
-commandList = ingest(commandfile)
+
+#=========================================================================================
 #! Class initialization
-current = eight_puzzle()
-initialized = False
-maxNodes = 181440
-#! Command Operation
-for command in commandList:
-    operation = command.split()
-    if operation == []:
-        continue
-    if operation[0] == "setState":
-        ff.customPrint("setState Operation called", 2)
-        if (len(operation[1]) == 9):
-            current.setState(operation[1])
-            initialized = True
-        elif (len(operation[1]) == 3):
-            try:
-                state = ""+operation[1]+operation[2]+operation[3]
-            except:
-                ff.customPrint(
-                    "setState command failed. Provided state missing component!", 5)
-            current.setState(state)
-            initialized = True
-        else:
-            ff.customPrint(
-                "setState command provided a state not recognized!", 5)
-            exit(99)
-    elif operation[0] == "printState":
-        ff.customPrint("printState operation called", 2)
-        checkInit(initialized)
-        current.printState()
-    elif operation[0] == "move":
-        if operation[1] == "up" or operation[1] == "down" or operation[1] == "left" or operation[1] == "right":
-            ff.customPrint("Moving "+str(operation[1])+"!", 2)
-            checkInit(initialized)
-            current.move(operation[1], current.findBlank(), True)
-    elif operation[0] == "randomizeState":
-        ff.customPrint("randomizeState command called", 2)
-        try:
-            count = int(operation[1])
-            ff.customPrint("Request: "+str(count)+" steps", 2)
-        except:
-            ff.customPrint("Randomize state did not specify step count!", 5)
-            exit(99)
-        else:
-            checkInit(initialized)
-            current.randomize(count)
-    elif operation[0] == "solve":
-        beforeBoard = current
-        before = current.getState()
-        if operation[1] == "A-star":
-            ff.customPrint("solve A-star command called", 2)
-            if operation[2] == "h1":
-                ff.customPrint("using h1 heuristic", 2)
-                astar(current, "h1", maxNodes)
-            if operation[2] == "h2":
-                ff.customPrint("using h2 heuristic", 2)
-                astar(current, "h2", maxNodes)
-        if operation[1] == "beam":
-            ff.customPrint("solve beam command called", 2)
-            beam(current, int(operation[2]),maxNodes)
-
-    elif operation[0] == "maxNodes":
-        try:
-            maxNodes = int(operation[1])
-        except:
-            ff.customPrint("Given MaxNodes is not a value!", 5)
+maxNodesTest()
