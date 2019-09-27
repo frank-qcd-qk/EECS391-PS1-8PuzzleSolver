@@ -35,7 +35,7 @@ def astar(boardClass, heruisticsOption, maxNodes):
         #! Node Cap
         if(moves > maxNodes):
             ff.customPrint("Exceed allowed maxNodes!", 4)
-            return ("Unsolved",0)
+            return ("Unsolved", 0)
         #! Completion Check
         if puzzleNow.getState() == "b12345678":
             ff.customPrint(
@@ -56,13 +56,13 @@ def astar(boardClass, heruisticsOption, maxNodes):
                     elif index % 2 == 0:
                         item.printState()
                     else:
-                        print("move " + str(item))
+                        ff.customPrint("move " + str(item), 6)
                 ff.customPrint("Solution path:"+str(solutionStep), 2)
                 ff.customPrint("Solution length:"+str(puzzleNow.depth), 2)
-                return "Solved",puzzleNow.depth
+                return "Solved", puzzleNow.depth
             else:
                 ff.customPrint("Given a Solved board!", 4)
-                return "Solved",0
+                return "Solved", 0
         #! Search by getting babies!
         Options = puzzleNow.listAvailable()
         for option in Options:
@@ -105,14 +105,13 @@ def beam(boardClass, k, maxNodes):
     moves = 0
     childrenSorted = []
     allChildren = []
-    empty = False
     best = [boardClass]
-    while not empty:
+    while True:
         for child in best:
             #! Node Cap
             if(moves > maxNodes):
                 ff.customPrint("Exceed allowed maxNodes!", 4)
-                return ("Unsolved",0)
+                return ("Unsolved", 0)
             #! Goal!
             if child.getState() == "b12345678":
                 ff.customPrint(
@@ -120,10 +119,11 @@ def beam(boardClass, k, maxNodes):
                 solution = child.reverseTraversal([])
                 solution.reverse()
                 move_path = []
+                # ? Get solution step
                 for index, item in enumerate(solution):
                     if not index % 2 == 0:
                         move_path.append(item)
-
+                # ? Get solution
                 for index, item in enumerate(solution):
                     if index == 0:
                         ff.customPrint("Starting state", 6)
@@ -134,7 +134,7 @@ def beam(boardClass, k, maxNodes):
                         ff.customPrint("move " + str(item), 6)
                 ff.customPrint("Solution length:"+str(child.depth + 1), 2)
                 ff.customPrint("Solution path:"+str(move_path), 2)
-                return "Solved",(child.depth + 1)
+                return "Solved", (child.depth + 1)
             else:
                 currentPuzzle = child
                 options = currentPuzzle.listAvailable()
@@ -159,7 +159,7 @@ def beam(boardClass, k, maxNodes):
             for i in range(0, len(childrenSorted)):
                 best.append(childrenSorted.pop(0))
         childrenSorted = []
-        empty = False
+
 
 # ========================================================================================
 #! Start of the program:
@@ -228,7 +228,7 @@ for command in commandList:
                 astar(current, "h2", maxNodes)
         if operation[1] == "beam":
             ff.customPrint("solve beam command called", 2)
-            beam(current, int(operation[2]),maxNodes)
+            beam(current, int(operation[2]), maxNodes)
 
     elif operation[0] == "maxNodes":
         try:

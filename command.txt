@@ -7,3 +7,4 @@ printState
 solve A-star h1
 randomizeState 10
 solve A-star h2
+solve beam 20

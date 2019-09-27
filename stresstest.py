@@ -81,18 +81,17 @@ def astar(boardClass, heruisticsOption, maxNodes):
         openList = sorted(openList, key=lambda p: p.functionValue)
 
 
-def beam(boardClass, k,maxNodes):
+def beam(boardClass, k, maxNodes):
     moves = 0
     childrenSorted = []
     allChildren = []
-    empty = False
     best = [boardClass]
-    while not empty:
+    while True:
         for child in best:
             #! Node Cap
             if(moves > maxNodes):
                 ff.customPrint("Exceed allowed maxNodes!", 4)
-                return ("Unsolved",0)
+                return ("Unsolved", 0)
             #! Goal!
             if child.getState() == "b12345678":
                 ff.customPrint(
@@ -100,10 +99,11 @@ def beam(boardClass, k,maxNodes):
                 solution = child.reverseTraversal([])
                 solution.reverse()
                 move_path = []
+                # ? Get solution step
                 for index, item in enumerate(solution):
                     if not index % 2 == 0:
                         move_path.append(item)
-
+                # ? Get solution
                 for index, item in enumerate(solution):
                     if index == 0:
                         ff.customPrint("Starting state", 6)
@@ -114,7 +114,7 @@ def beam(boardClass, k,maxNodes):
                         ff.customPrint("move " + str(item), 6)
                 ff.customPrint("Solution length:"+str(child.depth + 1), 2)
                 ff.customPrint("Solution path:"+str(move_path), 2)
-                return "Solved",(child.depth + 1)
+                return "Solved", (child.depth + 1)
             else:
                 currentPuzzle = child
                 options = currentPuzzle.listAvailable()
@@ -139,7 +139,6 @@ def beam(boardClass, k,maxNodes):
             for i in range(0, len(childrenSorted)):
                 best.append(childrenSorted.pop(0))
         childrenSorted = []
-        empty = False
 
 # ========================================================================================
 def maxNodesTest():
