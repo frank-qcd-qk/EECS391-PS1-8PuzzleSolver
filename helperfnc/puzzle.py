@@ -21,8 +21,11 @@ class eight_puzzle:
         input_str_list = list(input_str)
         input_str_list[i], input_str_list[j] = input_str_list[j], input_str_list[i]
         ff.customPrint(
-            "Swapped: |"+input_str_list[i]+"| and |"+input_str_list[j]+"|", 2)
+            "Swapped: |"+input_str_list[i]+"| and |"+input_str_list[j]+"|", 0)
         return ''.join(input_str_list)
+
+    def getState(self):
+        return self.board
 
     def printState(self):
         try:
@@ -46,10 +49,6 @@ class eight_puzzle:
         new_state = state.replace(" ", "")
         self.board = new_state
         ff.customPrint("State Set successfully!")
-        self.printState()
-
-    def maxNode(self, count):
-        self.maxNode = count
 
     def findBlank(self):
         return self.board.find('b')
@@ -103,12 +102,12 @@ class eight_puzzle:
             status, boardUpdated = self.moveRight(ID, action)
         if (status == 1):
             if action:
-                ff.customPrint("Move Success", 1)
+                ff.customPrint("Move Success", 0)
             else:
-                ff.customPrint("Plan success", 1)
+                ff.customPrint("Plan success", 0)
             return 1,boardUpdated
         elif (status == 3):
-            ff.customPrint("Not a valid move due to already at boarder", 2)
+            ff.customPrint("Not a valid move due to already at boarder", 0)
             return 3,""
         else:
             ff.customPrint(
@@ -127,22 +126,25 @@ class eight_puzzle:
             success = False
             action = random.choice(["up", "down", "left", "right"])
             while not success:
-                if self.move(action, self.findBlank(), False) == 1:
+                status,forecast = self.move(action,self.findBlank(),False)
+                if status == 1:
                     self.move(action, self.findBlank(), True)
                     success = True
                     action_step = action_step+action+", "
                 else:
                     action = random.choice(["up", "down", "left", "right"])
-        ff.customPrint("Randomize complete. Steps are:"+action_step, 1)
+        ff.customPrint("Randomize complete. Randomized: "+str(count)+" Steps are:"+action_step, 1)
 
     def calculateHeuristic1(self,board=""):
         """
         h1 = the number of misplaced tiles.
         """
         heuristic1 = 0
-        u = zip(self.board, "b12345678")
+        if board == "":
+            board = self.board
+        u = zip(board, "b12345678")
         for i, j in u:
-            if (not i == j) and (not i == 'b'):
+            if (not i == j) and (not i =='b'):
                 heuristic1 = heuristic1 + 1
         ff.customPrint("Current Heuristic is "+str(heuristic1))
         return heuristic1
@@ -154,7 +156,9 @@ class eight_puzzle:
         heuristic2 = 0
         row_tracker = 1
         column_tracker = 0
-        for i in self.board:
+        if board == "":
+            board = self.board
+        for i in board:
             if column_tracker != 3:
                 column_tracker = column_tracker + 1
             else:
@@ -180,9 +184,9 @@ class eight_puzzle:
 
     def listAvailable(self):
         potential = ["", "", "", ""]
-        status1,potential[0] =self.move('up',self.findBlank(), False)
-        status2,potential[1] =self.move('down',self.findBlank(), False)
-        status3,potential[2] =self.move('left',self.findBlank(), False)
-        status4,potential[3] =self.move('right',self.findBlank(), False)
+        status1,potential[0] =self.move('left',self.findBlank(), False)
+        status2,potential[1] =self.move('right',self.findBlank(), False)
+        status3,potential[2] =self.move('up',self.findBlank(), False)
+        status4,potential[3] =self.move('down',self.findBlank(), False)
         ff.customPrint("Available Option are: "+str(potential))
         return potential

@@ -6,7 +6,7 @@ class frank_function:
     def __init__(self):
         pass
 
-    def customPrint(input_str, level=0,DEBUG=True,MINIMAL=False):
+    def customPrint(input_str, level=0,DEBUG=False,MINIMAL=True):
         """
         Parameters
         ----------
