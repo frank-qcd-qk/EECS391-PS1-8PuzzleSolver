@@ -1,4 +1,9 @@
 setState b12 345 678
-randomizeState 30
 printState
-solve beam 80
+move right
+printState
+randomizeState 2
+printState
+solve A-star h1
+randomizeState 10
+solve A-star h2

@@ -35,7 +35,7 @@ def astar(boardClass, heruisticsOption, maxNodes):
         #! Node Cap
         if(moves > maxNodes):
             ff.customPrint("Exceed allowed maxNodes!", 4)
-            return
+            return ("Unsolved",0)
         #! Completion Check
         if puzzleNow.getState() == "b12345678":
             ff.customPrint(
@@ -59,10 +59,10 @@ def astar(boardClass, heruisticsOption, maxNodes):
                         print("move " + str(item))
                 ff.customPrint("Solution path:"+str(solutionStep), 2)
                 ff.customPrint("Solution length:"+str(puzzleNow.depth), 2)
-                return solution, puzzleNow.depth
+                return "Solved",puzzleNow.depth
             else:
                 ff.customPrint("Given a Solved board!", 4)
-                return
+                return "Solved",0
         #! Search by getting babies!
         Options = puzzleNow.listAvailable()
         for option in Options:
@@ -112,7 +112,7 @@ def beam(boardClass, k, maxNodes):
             #! Node Cap
             if(moves > maxNodes):
                 ff.customPrint("Exceed allowed maxNodes!", 4)
-                return
+                return ("Unsolved",0)
             #! Goal!
             if child.getState() == "b12345678":
                 ff.customPrint(
@@ -134,7 +134,7 @@ def beam(boardClass, k, maxNodes):
                         ff.customPrint("move " + str(item), 6)
                 ff.customPrint("Solution length:"+str(child.depth + 1), 2)
                 ff.customPrint("Solution path:"+str(move_path), 2)
-                return 
+                return "Solved",(child.depth + 1)
             else:
                 currentPuzzle = child
                 options = currentPuzzle.listAvailable()

@@ -4,27 +4,6 @@ import sys
 from decimal import Decimal
 import csv
 
-
-def ingest(fileLocation):
-    operation = []
-    try:
-        with open(fileLocation, 'r') as schema:
-            for line in schema:
-                operation.append(line)
-    except:
-        ff.customPrint("File command not found! Please check path", 5)
-        exit(99)
-    finally:
-        ff.customPrint("Commands open successfully.")
-    return operation
-
-
-def checkInit(initialized):
-    if not initialized:
-        ff.customPrint(
-            "Board still not initialized! Using default!", 4)
-
-
 def astar(boardClass, heruisticsOption, maxNodes):
     moves = 0
     openList = [boardClass]
@@ -177,7 +156,43 @@ def maxNodesTest():
                 maxNodeTest_writer.writerow(['A-Star h2',(i*100), resulth2, steps2])                
                 maxNodeTest_writer.writerow(['Beam 80',(i*100), resultB, steps3])        
 
+def heruisticsOptionCompare():
+    with open('heruisticsCompare.csv', mode='w') as heruisticsCompare_file:
+        heruisticsCompare_writer = csv.writer(heruisticsCompare_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        current = eight_puzzle()
+        for i in range(0, 100):
+            current.randomize(20)
+            resulth1,steps1 = astar(current,"h1",10000)
+            resulth2,steps2 = astar(current,"h2",10000)
+            heruisticsCompare_writer.writerow(['A-Star h1',resulth1, steps1])
+            heruisticsCompare_writer.writerow(['A-Star h2',resulth2, steps2])
+
+def solutionLengthCompare():
+    with open('LengthCompare.csv', mode='w') as LengthCompare_file:
+        LengthCompare_writer = csv.writer(LengthCompare_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        current = eight_puzzle()
+        for i in range(0, 100):
+            current.randomize(20)
+            resulth1,steps1 = astar(current,"h1",10000)
+            resulth2,steps2 = astar(current,"h2",10000)
+            result3,steps3 = beam(current,80,1000)
+            result4,steps4 = beam(current,20,1000)
+            LengthCompare_writer.writerow(['A-Star h1',resulth1, steps1])
+            LengthCompare_writer.writerow(['A-Star h2',resulth2, steps2])
+            LengthCompare_writer.writerow(['Beam 20',result4, steps4])
+            LengthCompare_writer.writerow(['Beam 80',result3, steps3])
+
+def randomizeStressTest():
+    current = eight_puzzle()
+    with open('randomizeTest.csv', mode='w') as randomizeTest_File:
+        RandomizeTest_writer = csv.writer(randomizeTest_File, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        for i in range(0,10000):
+            current.randomize(100)
+            RandomizeTest_writer.writerow([current.getState()])
 
 #=========================================================================================
 #! Class initialization
-maxNodesTest()
+#maxNodesTest()
+#heruisticsOptionCompare()
+#solutionLengthCompare()
+randomizeStressTest()
