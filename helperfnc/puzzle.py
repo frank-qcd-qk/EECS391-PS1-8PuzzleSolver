@@ -9,7 +9,10 @@ class eight_puzzle:
 
     def __init__(self, board="b12345678"):
         self.board = board
-        self.maxNode = 0
+        self.herusticValue = 0
+        self.functionValue = 0
+        self.depth = 0
+        self.parent = None
 
     def customSwap(self, i, j, input_str=""):
         """
@@ -91,7 +94,7 @@ class eight_puzzle:
 
     def move(self, command, ID, action):
         status = -1
-        ff.customPrint("Moving: "+command)
+        ff.customPrint("Moving: "+str(command))
         if(command == 'up'):
             status, boardUpdated = self.moveUp(ID, action)
         if(command == 'down'):
@@ -190,3 +193,27 @@ class eight_puzzle:
         status4,potential[3] =self.move('down',self.findBlank(), False)
         ff.customPrint("Available Option are: "+str(potential))
         return potential
+
+    def reverseTraversal(self, solution):
+        if self.parent == None:
+            solution.append(self)
+            return solution
+        else:
+            move = self.whatMove()
+            solution.append(self)
+            solution.append(move)
+            return self.parent.reverseTraversal(solution)
+
+    def whatMove(self):
+        move = ""
+        end = self.findBlank()
+        start = self.parent.findBlank()
+        if start - end == 3:
+            move = "up"
+        elif start - end == -3:
+            move = "down"
+        elif start - end == -1:
+            move = "right"            
+        elif start - end == 1:
+            move = "left"
+        return move            

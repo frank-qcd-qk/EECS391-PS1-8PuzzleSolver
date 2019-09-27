@@ -33,3 +33,9 @@ class frank_function:
             print("[FATAL]"+message)
         else:
             print(message)
+
+    def find_index(a_list, item):
+        for index, puzzle in enumerate(a_list):
+            if puzzle.board == item.board:
+                return index
+        return -1

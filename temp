@@ -1,0 +1,74 @@
+
+def astar(boardClass, heruisticsOption, maxNodes):
+    start = boardClass.getState()
+    actionSquence = []
+    actionRecall = []
+    visited = []
+    while not boardClass.isGoal():
+        if len(actionRecall)>maxNodes:
+            ff.customPrint("Error! Exceed Max Nodes!")
+            exit(99)
+        options = boardClass.listAvailable()
+        heruistics = []
+        indextable = ["left","right","up","down"]
+        for option in options:
+            if(option != "") and (not option in actionRecall):
+                if heruisticsOption =='h1':
+                    heruistics.append(boardClass.calculateHeuristic1(option))
+                else:
+                    heruistics.append(boardClass.calculateHeuristic2(option))
+            else:
+                heruistics.append(Decimal('Infinity'))
+        ff.customPrint("option heruistics are: "+str(heruistics),1)
+        ff.customPrint("optional choice are: "+str(options),1)
+        
+        #! Handle same heruistics problem
+        newOptions = []
+        newHeuristics = []
+        newIndexTable = []
+        for i in range(4):
+            if heruistics[i] == min(heruistics):
+                newOptions.append(options[i])
+                newHeuristics.append(heruistics[i])
+                newIndexTable.append(indextable[i])
+
+        ff.customPrint("Current Potential Option: "+str(newOptions),1)
+        ff.customPrint("Current Potential heruistics: "+str(newHeuristics),1)
+        ff.customPrint("Current Step Index: "+str(newIndexTable),1)
+
+        if len(newOptions)>1:
+            for i in range(len(newOptions)):
+                testSuccessor = eight_puzzle()
+                testSuccessor.setState(newOptions[i])
+                try:
+                    tbd = testSuccessor.listAvailable()
+                except:
+                    return[0]
+                testHeuristics = []
+                for testcase in options:
+                    if(testcase != "") and (not testcase in actionRecall):
+                        if heruisticsOption =='h1':
+                            testHeuristics.append(boardClass.calculateHeuristic1(option))
+                        else:
+                            testHeuristics.append(boardClass.calculateHeuristic2(option))
+                    else:
+                        testHeuristics.append(Decimal('Infinity'))
+                newHeuristics[i] = min(testHeuristics)
+                ff.customPrint("Current test heruistics for : "+str(i)+" is "+str(testHeuristics),1)
+
+
+        ff.customPrint("Current New heruistics: "+str(newHeuristics),1)
+        nextOptionID = newHeuristics.index(min(newHeuristics))
+        actionSquence.append(newIndexTable[nextOptionID])
+        try:
+            boardClass.setState(newOptions[nextOptionID])
+        except:
+            return [0]
+        ff.customPrint("State Changed! Now:"+str(options[nextOptionID]))
+        actionRecall.append(newOptions[nextOptionID])
+
+    ff.customPrint("Steps: "+ str(len(actionSquence)) +" Action is:"+str(actionSquence),2)
+    return actionSquence
+
+
+1

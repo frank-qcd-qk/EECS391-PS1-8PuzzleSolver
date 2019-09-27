@@ -22,107 +22,83 @@ def checkInit(initialized):
             "Board still not initialized! Using default!", 4)
 
 def astar(boardClass, heruisticsOption, maxNodes):
-    start = boardClass.getState()
-    actionSquence = []
-    actionRecall = []
-    visited = []
-    while not boardClass.isGoal():
-        if len(actionRecall)>maxNodes:
-            ff.customPrint("Error! Exceed Max Nodes!")
-            exit(99)
-        options = boardClass.listAvailable()
-        heruistics = []
-        indextable = ["left","right","up","down"]
-        for option in options:
-            if(option != "") and (not option in actionRecall):
-                if heruisticsOption =='h1':
-                    heruistics.append(boardClass.calculateHeuristic1(option))
-                else:
-                    heruistics.append(boardClass.calculateHeuristic2(option))
-            else:
-                heruistics.append(Decimal('Infinity'))
-        ff.customPrint("option heruistics are: "+str(heruistics),1)
-        ff.customPrint("optional choice are: "+str(options),1)
-        
-        #! Handle same heruistics problem
-        newOptions = []
-        newHeuristics = []
-        newIndexTable = []
-        for i in range(4):
-            if heruistics[i] == min(heruistics):
-                newOptions.append(options[i])
-                newHeuristics.append(heruistics[i])
-                newIndexTable.append(indextable[i])
+    moves = 0
+    openList = [boardClass]
+    closed = []
 
-        ff.customPrint("Current Potential Option: "+str(newOptions),1)
-        ff.customPrint("Current Potential heruistics: "+str(newHeuristics),1)
-        ff.customPrint("Current Step Index: "+str(newIndexTable),1)
-
-        if len(newOptions)>1:
-            for i in range(len(newOptions)):
-                testSuccessor = eight_puzzle()
-                testSuccessor.setState(newOptions[i])
-                try:
-                    tbd = testSuccessor.listAvailable()
-                except:
-                    return[0]
-                testHeuristics = []
-                for testcase in options:
-                    if(testcase != "") and (not testcase in actionRecall):
-                        if heruisticsOption =='h1':
-                            testHeuristics.append(boardClass.calculateHeuristic1(option))
-                        else:
-                            testHeuristics.append(boardClass.calculateHeuristic2(option))
+    while(len(openList)>0):
+        puzzleNow = openList.pop(0)
+        moves+=1
+        #! Node Cap
+        if(moves>maxNodes):
+            ff.customPrint("Exceed allowed maxNodes!",4)
+            return
+        #! Completion Check
+        if puzzleNow.getState() == "b12345678":
+            ff.customPrint("====================Solution====================",6)
+            if len(closed) > 0:
+                solution = puzzleNow.reverseTraversal([])
+                solution.reverse()
+                solutionStep = []
+                #? Get solution step
+                for index, item in enumerate(solution):
+                    if not index % 2 == 0:
+                        solutionStep.append(item)
+                #? Get solution
+                for index, item in enumerate(solution):
+                    if index == 0:
+                        ff.customPrint("Starting state",6)
+                        item.printState()
+                    elif index % 2 == 0:
+                        item.printState()
                     else:
-                        testHeuristics.append(Decimal('Infinity'))
-                newHeuristics[i] = min(testHeuristics)
-                ff.customPrint("Current test heruistics for : "+str(i)+" is "+str(testHeuristics),1)
+                        print ("move " + str(item))
+                ff.customPrint("Solution path:"+str(solutionStep),2)
+                ff.customPrint("Solution length:"+str(puzzleNow.depth),2)
+                return solution, puzzleNow.depth
+            else:
+                ff.customPrint("Given a Solved board!",4)
+                return 
+        #! Search by getting babies!
+        new_moves = puzzleNow.listAvailable()
+        for move in new_moves:
+            if move != '':
+                state = eight_puzzle(move)
+                if heruisticsOption == "h1":
+                    state.herusticValue = state.calculateHeuristic1()
+                else:
+                    state.herusticValue = state.calculateHeuristic2()
+                state.depth = puzzleNow.depth + 1
+                state.functionValue = state.herusticValue + state.depth
+                state.parent = puzzleNow
+                #? Check existance
+                openID = ff.find_index(openList, state)
+                closeID = ff.find_index(closed, state)
+                if openID == -1 and closeID == -1:
+                    #* Not searched
+                    openList.append(state)    
+                elif openID > -1:
+                    already_seen = openList[openID]
+                    if state.functionValue < already_seen.functionValue:
+                        already_seen.functionValue = state.functionValue
+                        already_seen.herusticValue = state.herusticValue
+                        already_seen.parent = state.parent
+                        already_seen.depth = state.depth
+                elif closeID > -1:
+                    already_seen = closed[closeID]
+                    if state.functionValue < already_seen.functionValue:
+                        state.herusticValue = already_seen.herusticValue
+                        state.functionValue = already_seen.functionValue
+                        state.depth = already_seen.depth
+                        state.parent = already_seen.parent
+                        closed.remove(already_seen)
+                        openList.append(state)
+        closed.append(puzzleNow)
+        open_list = sorted(openList, key=lambda p: p.functionValue)
 
 
-        ff.customPrint("Current New heruistics: "+str(newHeuristics),1)
-        nextOptionID = newHeuristics.index(min(newHeuristics))
-        actionSquence.append(newIndexTable[nextOptionID])
-        try:
-            boardClass.setState(newOptions[nextOptionID])
-        except:
-            return [0]
-        ff.customPrint("State Changed! Now:"+str(options[nextOptionID]))
-        actionRecall.append(newOptions[nextOptionID])
 
-    ff.customPrint("Steps: "+ str(len(actionSquence)) +" Action is:"+str(actionSquence),2)
-    return actionSquence
-
-def beam(boardClass,k):
-    openList =[]
-    visitedList = []
-    parents = []
-    successorTester = eight_puzzle()
-    movementCost = 0
-
-    openList.append(boardClass.getState())
-    visitedList.append(boardClass.getState())
-
-
-    while len(openList)>0:
-        movementCost += 1
-        board = openList.pop(0)
-
-        if board=="b12345678":
-            break;
-
-        if (len(visitedList)>maxNodes):
-            ff.customPrint("Exceed Maximum allowed exploration! Quit!",5)
-            exit(99)
         
-        successorTester.setState(board)
-        potential = successorTester.listAvailable()
-        for option in potential:
-            if option != '':
-                successorTester.calculateHeuristic2(option)
-            
-                if((option not in visitedList) and (option not in openList)):
-                    openList.append(option)
-                    visitedList.append(option)
 
 def demo(before,actionSquence):
     ff.customPrint("====================Result Demo====================",6)
@@ -191,20 +167,19 @@ for command in commandList:
             checkInit(initialized)
             current.randomize(count)
     elif operation[0] == "solve":
+        beforeBoard = current
         before = current.getState()
         if operation[1]=="A-star":
             ff.customPrint("solve A-star command called",2)
             if operation[2]=="h1":
                 ff.customPrint("using h1 heuristic",2)
-                action = astar(current, "h1",maxNodes)
-                demo(before,action)
+                astar(current, "h1",maxNodes)
             if operation[2]=="h2":
                 ff.customPrint("using h2 heuristic",2)
-                action = astar(current, "h2",maxNodes)
-                demo(before,action)
+                astar(current, "h2",maxNodes)
         if operation[1]=="beam":
             ff.customPrint("solve beam command called",2)
-            pass
+            beam(current,operation[2])
 
     elif operation[0] == "maxNodes":
         try:
